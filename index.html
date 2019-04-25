@@ -1,72 +1,115 @@
+<!-- HTML for Bootcamp Homework #7 -->
+<!-- Paul Raab -->
+<!-- Raab Enterprises LLC -->
+<!-- 4/12/2019 -->
+<!-- Train Scheduler App -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="utf-8">
-  <title>Favorite Movies</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Train Scheduler</title>
+
+  <!-- Reset browsers to initial conditions -->
+  <link rel="stylesheet" href="./assets/css/reset.css">
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+  <!-- Firebase Reference -->
+  <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase.js"></script>
+
+  <!-- Moment.js Reference -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+
+  <!-- App style sheet -->
+  <link rel="stylesheet" href="./assets/css/style.css">
+
 </head>
 
 <body>
-  <div class="container">
-    <h2>Basic Table</h2>
-    <p>The .table class adds basic styling (light padding and only horizontal dividers) to a table:</p>
-    <table class="table">
-      <thead>
-        <tr>
-          <!-- The scope attribute specifies that this is a header for a column -->
-          <th scope="col">Movie Name</th>
-          <th scope="col">Year</th>
-          <th scope="col">Actors</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Interstellar</td>
-          <td>2014</td>
-          <td>Ellen Burstyn, Matthew McConaughey, Mackenzie Foy, John Lithgow</td>
-        </tr>
-        <!-- Insert additional movie rows here -->
-      </tbody>
-    </table>
+
+  <div id="wrapper">
+
+    <!-- Train Scheduler -->
+    <div class="container">
+
+      <!-- Jumbotron -->
+      <div class="jumbotron" style="background-color: black; color: white">
+        <h1 class="text-center">Train Scheduler</h1>
+        <h3 class="text-center">Manage trains and their schedules</h3>
+      </div>
+
+      <div class="row">
+
+        <div class="col-md-12">
+
+          <!-- Current trains-->
+          <div class="card mb-4">
+            <div class="card-header">Current Trains</div>
+            <div class="card-body">
+              <table class="table table-sm table-hover" id='train-table'>
+                <thead>
+                  <tr>
+                    <!-- The scope attribute specifies that this is a header for a column -->
+                    <th scope="col">Train Name</th>
+                    <th scope="col">Destination</th>
+                    <th scope="col">Frequency (min)</th>
+                    <th scope="col">Next Arrival</th>
+                    <th scope="col">Minutes Away</th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <!-- Add Employee  -->
+          <div class="card mb-4">
+            <div class="card-header">Add Train</div>
+            <div class="card-body">
+
+              <!-- Entry Form -->
+              <form>
+                <div class="form-group">
+                  <label for="name-input">Enter Train Name</label>
+                  <input class="form-control" id="name-input" placeholder="The John Galt Line" type="text">
+                </div>
+                <div class="form-group">
+                  <label for="destination-input">Enter Destination</label>
+                  <input class="form-control" id="destination-input" placeholder="Galts Gulch, CO" type="text">
+                </div>
+                <div class="form-group">
+                  <label for="time-input">Enter First Train Time (HH:MM)</label>
+                  <input class="form-control" id="time-input" placeholder="15:00" type="text">
+                </div>
+                <div class="form-group">
+                  <label for="freq-input">Frequency (min)</label>
+                  <input class="form-control" id="freq-input" placeholder="60" type="text">
+                </div>
+                <button class="btn btn-primary float-right" id="add-train-btn">Submit</button>
+              </form>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script type="text/javascript">
-    // The createRow function takes data returned by OMDB and appends the table data to the tbody
-    var createRow = function(data) {
-      // Create a new table row element
-      var tRow = $("<tr>");
 
-      // Methods run on jQuery selectors return the selector they we run on
-      // This is why we can create and save a reference to a td in the same statement we update its text
-      var titleTd = $("<td>").text(data.Title);
-      var yearTd = $("<td>").text(data.Year);
-      var actorsTd = $("<td>").text(data.Actors);
-        
-      // Append the newly created table data to the table row
-      tRow.append(titleTd, yearTd, actorsTd);
-      // Append the table row to the table body
-      $("tbody").append(tRow);
-    };
+  <!-- Local app javascript -->
+  <script src="./assets/javascript/app.js"></script>
 
-    // The search OMDB function takes a movie, searches the omdb api for it, and then passes the data to createRow
-    var searchOMDB = function(movie) {
-      var queryURL = "https://www.omdbapi.com/?t=" + movie + "&apikey=trilogy";
-      $.ajax({
-        url: queryURL,
-        method: "GET"
-      }).then(function(response) {
-        createRow(response);
-      });
-    };
-
-    // Search the OMDB API for the following movies, and append table rows for each
-    searchOMDB("Mr. Nobody");
-    searchOMDB("The Little Mermaid");
-    searchOMDB("The Lion King");
-
-  </script>
 </body>
 
 </html>
