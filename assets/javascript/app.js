@@ -71,6 +71,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
         console.log(childSnapshot.val());
 
         // Store everything into a variable.
+        var key = childSnapshot.key;
+        console.log("Key " + key);
         var name = childSnapshot.val().name;
         var destination = childSnapshot.val().destination;
         firstTime = childSnapshot.val().time;
@@ -80,8 +82,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
         computeTime();
 
         // Create update and remove buttons
-        var updateButton = $("<button>").html("<span class='glyphicon glyphicon-edit'>U</span>").addClass("updateButton").attr("data-index", index);
-        var removeButton = $("<button>").html("<span class='glyphicon glyphicon-remove'>R</span>").addClass("removeButton").attr("data-index", index);
+        var updateButton = $("<button>").html("<span class='glyphicon glyphicon-edit'>U</span>").addClass("updateButton").attr("data-index", index).attr("data-key", key);
+        var removeButton = $("<button>").html("<span class='glyphicon glyphicon-remove'>R</span>").addClass("removeButton").attr("data-index", index).attr("data-key", key);
 
         // Create the new row
         var newRow = $("<tr>").append(
@@ -171,5 +173,14 @@ document.addEventListener("DOMContentLoaded", function (event) {
     function displayImage() {
         $("#wrapper").css('background-image', 'url("' + images[count] + '")');
     }
+
+    $(document).on("click", ".removeButton", removeRow);
+
+    function removeRow() {
+        console.log("Remove row ");
+        $(".row-" + $(this).attr("data-index")).remove();
+        database.ref().child($(this).attr("data-key")).remove();
+    };
+
 
 });
