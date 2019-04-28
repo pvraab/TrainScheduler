@@ -66,6 +66,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         $("#freq-input").val("");
     });
 
+    var index = 0;
     database.ref().on("child_added", function (childSnapshot) {
         console.log(childSnapshot.val());
 
@@ -78,6 +79,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
         // Compute time values
         computeTime();
 
+        // Create update and remove buttons
+        var updateButton = $("<button>").html("<span class='glyphicon glyphicon-edit'>U</span>").addClass("updateButton").attr("data-index", index);
+        var removeButton = $("<button>").html("<span class='glyphicon glyphicon-remove'>R</span>").addClass("removeButton").attr("data-index", index);
+
         // Create the new row
         var newRow = $("<tr>").append(
             $("<td>").text(name),
@@ -85,8 +90,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
             $("<td>").text(firstTime),
             $("<td>").text(freq),
             $("<td>").text(nextArrival),
-            $("<td>").text(minutesAway)
+            $("<td>").text(minutesAway),
+            $("<td>").html(updateButton),
+            $("<td>").html(removeButton)
         );
+
+        index++;
 
         // Append the new row to the table
         $("#train-table > tbody").append(newRow);
@@ -145,13 +154,14 @@ document.addEventListener("DOMContentLoaded", function (event) {
             console.log($(row));
             console.log($(row)[0].cells[0].innerHTML);
             if (!($(row)[0].cells[0].innerText.trim() === "Train Name")) {
+
                 firstTime = $(row)[0].cells[2].textContent;
                 freq = $(row)[0].cells[3].textContent;
                 computeTime();
                 $(row)[0].cells[4].textContent = nextArrival;
                 $(row)[0].cells[5].textContent = minutesAway;
             }
-
+            index++;
         });
 
     }
