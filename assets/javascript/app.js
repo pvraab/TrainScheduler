@@ -139,81 +139,20 @@ document.addEventListener("DOMContentLoaded", function (event) {
     // Update arrivals
     function incrementArrival() {
         console.log("In incrementArrival");
-        database.ref().once('value', function (snapshot) {
-            snapshot.forEach(function (childSnapshot) {
-                var childKey = childSnapshot.key;
-                console.log(childKey);
-                // ...
-            });
-        });
 
         //run through each row
         $('#train-table tr').each(function (i, row) {
             console.log($(row));
             console.log($(row)[0].cells[0].innerHTML);
             if (!($(row)[0].cells[0].innerText.trim() === "Train Name")) {
-                $(row)[0].cells[5].textContent = "Test";
+                firstTime = $(row)[0].cells[2].textContent;
+                freq = $(row)[0].cells[3].textContent;
+                computeTime();
+                $(row)[0].cells[4].textContent = nextArrival;
+                $(row)[0].cells[5].textContent = minutesAway;
             }
 
-            // // reference all the stuff you need first
-            // var $row = $(row),
-            //     $family = $row.find('input[name*="family"]'),
-            //     $grade = $row.find('input[name*="grade"]'),
-            //     $checkedBoxes = $row.find('input:checked');
-
-            // $checkedBoxes.each(function (i, checkbox) {
-            //     // assuming you layout the elements this way, 
-            //     // we'll take advantage of .next()
-            //     var $checkbox = $(checkbox),
-            //         $line = $checkbox.next(),
-            //         $size = $line.next();
-
-            //     $line.val(
-            //         $family.val() + ' ' + $size.val() + ', ' + $grade.val()
-            //     );
-
-            // });
-
         });
-
-
-        // Get the row from the DB
-        // ref.once('value').then(function(snapshot) { 
-        //     var max = (snapshot.val());
-        //     var randomIndex = Math.floor(Math.random() * max) + 1;
-        //     var rootRef = firebase.database().ref(); 
-        //     rootRef.orderByChild('data').equalTo('n:'+randomIndex).once("value")
-
-        //       .then(function(snapshot) {
-        //         console.log(snapshot.val());
-        //       });
-        // }, function(error){console.error(error)});
-        // database.ref().once('value').then(function(snapshot) { 
-        // // database.ref().orderByChild("time").once("value", function (snapshot) {
-        //     console.log(snapshot);
-
-        //     // Store everything into a variable.
-        //     var name = snapshot.val().name;
-        //     var destination = snapshot.val().destination;
-        //     firstTime = snapshot.val().time;
-        //     freq = snapshot.val().freq;
-
-        //     // Compute time values
-        //     computeTime();
-
-        //     // Create the new row
-        //     var newRow = $("<tr>").append(
-        //         $("<td>").text(name),
-        //         $("<td>").text(destination),
-        //         $("<td>").text(firstTime),
-        //         $("<td>").text(freq),
-        //         $("<td>").text(nextArrival),
-        //         $("<td>").text(minutesAway)
-        //     );
-
-        //     // Append the new row to the table
-        //     $("#train-table > tbody").append(newRow);
-        // });
 
     }
 
