@@ -3,8 +3,6 @@
 // Raab Enterprises LLC
 // 4/20/2019
 // Building a Train Scheduler
-// I am doing this in JavaScript to refresh my memory. JQuery 
-// is easier but JavaScript is closer to the DOM
 // 
 // ToDo
 // As table grows what do we do with the div below. Either add a
@@ -14,6 +12,14 @@
 document.addEventListener("DOMContentLoaded", function (event) {
 
     console.log("Doc ready event" + event);
+
+    var firstTime;
+    var freq;
+    var nextArrival;
+    var minutesAway;
+
+    // Start timer
+    startTimer();
 
     // Initialize Firebase
     var config = {
@@ -51,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         // Uploads train data to the database
         database.ref().push(newTrain);
 
-        alert("Employee successfully added");
+        alert("Train successfully added");
 
         // Clears all of the text-boxes
         $("#name-input").val("");
@@ -60,37 +66,161 @@ document.addEventListener("DOMContentLoaded", function (event) {
         $("#freq-input").val("");
     });
 
-    database.ref().on("child_added", function(childSnapshot) {
+    database.ref().on("child_added", function (childSnapshot) {
         console.log(childSnapshot.val());
-      
+
         // Store everything into a variable.
         var name = childSnapshot.val().name;
         var destination = childSnapshot.val().destination;
-        var time = childSnapshot.val().time;
-        var freq = childSnapshot.val().freq;
-      
-        // // Prettify the employee start
-        // var empStartPretty = moment.unix(empStart).format("MM/DD/YYYY");
-      
-        // // Calculate the months worked using hardcore math
-        // // To calculate the months worked
-        // var empMonths = moment().diff(moment(empStart, "X"), "months");
-        // console.log(empMonths);
-      
-        // // Calculate the total billed rate
-        // var empBilled = empMonths * empRate;
-        // console.log(empBilled);
-      
+        firstTime = childSnapshot.val().time;
+        freq = childSnapshot.val().freq;
+
+        // Compute time values
+        computeTime();
+
         // Create the new row
         var newRow = $("<tr>").append(
-          $("<td>").text(name),
-          $("<td>").text(destination),
-          $("<td>").text(time),
-          $("<td>").text(freq)
+            $("<td>").text(name),
+            $("<td>").text(destination),
+            $("<td>").text(firstTime),
+            $("<td>").text(freq),
+            $("<td>").text(nextArrival),
+            $("<td>").text(minutesAway)
         );
-      
+
         // Append the new row to the table
         $("#train-table > tbody").append(newRow);
-      });
-      
+    });
+
+    function computeTime() {
+        console.log("In computeTime " + firstTime);
+
+        // First Time (pushed back 1 year to make sure it comes before current time)
+        var firstTimeConverted = moment(firstTime, "HH:mm").subtract(1, "years");
+        console.log(firstTimeConverted);
+
+        // Current Time
+        var currentTime = moment();
+        console.log("CURRENT TIME: " + moment(currentTime).format("HH:mm"));
+
+        // Difference between the times
+        var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
+        console.log("DIFFERENCE IN TIME: " + diffTime);
+
+        // Time apart (remainder)
+        var tRemainder = diffTime % freq;
+        console.log(tRemainder);
+
+        // Minute Until Train
+        minutesAway = freq - tRemainder;
+        console.log("MINUTES TILL TRAIN: " + minutesAway);
+
+        // Next Train
+        nextArrival = moment().add(minutesAway, "minutes");
+        nextArrival = moment(nextArrival).format("HH:mm");
+        console.log("ARRIVAL TIME: " + nextArrival);
+    }
+
+    // Variable mainIntervalObj will hold the setInterval 
+    // to update train arrivals
+    var mainClockRunning = false;
+    var mainIntervalObj = null;
+
+    // Start the timer
+    function startTimer() {
+        if (!mainClockRunning) {
+            // Use mainIntervalObj to hold the setInterval to 
+            // update the train arrivals every minute
+            mainIntervalObj = setInterval(incrementArrival, 5000);
+            mainClockRunning = true;
+        }
+    }
+
+    // Update arrivals
+    function incrementArrival() {
+        console.log("In incrementArrival");
+        database.ref().once('value', function (snapshot) {
+            snapshot.forEach(function (childSnapshot) {
+                var childKey = childSnapshot.key;
+                console.log(childKey);
+                // ...
+            });
+        });
+
+        //run through each row
+        $('#train-table tr').each(function (i, row) {
+            console.log($(row));
+            console.log($(row)[0].cells[0].innerHTML);
+            if (!($(row)[0].cells[0].innerText.trim() === "Train Name")) {
+                $(row)[0].cells[5].textContent = "Test";
+            }
+
+            // // reference all the stuff you need first
+            // var $row = $(row),
+            //     $family = $row.find('input[name*="family"]'),
+            //     $grade = $row.find('input[name*="grade"]'),
+            //     $checkedBoxes = $row.find('input:checked');
+
+            // $checkedBoxes.each(function (i, checkbox) {
+            //     // assuming you layout the elements this way, 
+            //     // we'll take advantage of .next()
+            //     var $checkbox = $(checkbox),
+            //         $line = $checkbox.next(),
+            //         $size = $line.next();
+
+            //     $line.val(
+            //         $family.val() + ' ' + $size.val() + ', ' + $grade.val()
+            //     );
+
+            // });
+
+        });
+
+
+        // Get the row from the DB
+        // ref.once('value').then(function(snapshot) { 
+        //     var max = (snapshot.val());
+        //     var randomIndex = Math.floor(Math.random() * max) + 1;
+        //     var rootRef = firebase.database().ref(); 
+        //     rootRef.orderByChild('data').equalTo('n:'+randomIndex).once("value")
+
+        //       .then(function(snapshot) {
+        //         console.log(snapshot.val());
+        //       });
+        // }, function(error){console.error(error)});
+        // database.ref().once('value').then(function(snapshot) { 
+        // // database.ref().orderByChild("time").once("value", function (snapshot) {
+        //     console.log(snapshot);
+
+        //     // Store everything into a variable.
+        //     var name = snapshot.val().name;
+        //     var destination = snapshot.val().destination;
+        //     firstTime = snapshot.val().time;
+        //     freq = snapshot.val().freq;
+
+        //     // Compute time values
+        //     computeTime();
+
+        //     // Create the new row
+        //     var newRow = $("<tr>").append(
+        //         $("<td>").text(name),
+        //         $("<td>").text(destination),
+        //         $("<td>").text(firstTime),
+        //         $("<td>").text(freq),
+        //         $("<td>").text(nextArrival),
+        //         $("<td>").text(minutesAway)
+        //     );
+
+        //     // Append the new row to the table
+        //     $("#train-table > tbody").append(newRow);
+        // });
+
+    }
+
+    // This function will replace display whatever image it's given
+    // in the 'src' attribute of the img tag.
+    function displayImage() {
+        $("#wrapper").css('background-image', 'url("' + images[count] + '")');
+    }
+
 });
