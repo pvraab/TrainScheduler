@@ -8,15 +8,16 @@
 // As table grows what do we do with the div below. Either add a
 //  scrollbar, push lower div down, or something else
 
-// Javascript version of wait for document to be ready
-document.addEventListener("DOMContentLoaded", function (event) {
+// Wait for document to finish loading
+$(document).ready(function () {
 
-    console.log("Doc ready event" + event);
 
     var firstTime;
     var freq;
     var nextArrival;
     var minutesAway;
+    var isUpdate = false;
+    var uid = null;
 
     // Start timer
     startTimer();
@@ -34,30 +35,51 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     var database = firebase.database();
 
-    // Handle an onclick event on the Train Admin submit button
+    // Handle an onclick event on the Train Admin submit/update button
     $("#add-train-btn").on("click", function () {
 
         // Stop default form behavior
         event.preventDefault();
 
-        // Grabs user input
+        // Grabs user input from add/update form
         var name = $("#name-input").val().trim();
         var destination = $("#destination-input").val().trim();
         var time = $("#time-input").val().trim();
         var freq = $("#freq-input").val().trim();
 
+        // Update a row
+        if (isUpdate) {
+
+            var updateTrain = {
+                name: name,
+                destination: destination,
+                time: time,
+                freq: freq
+            };
+
+            var updates = {};
+            updates[uid] = updateTrain;
+            firebase.database().ref().update(updates);
+
+        }
+
         // Creates local "temporary" object for holding train data
-        var newTrain = {
-            name: name,
-            destination: destination,
-            time: time,
-            freq: freq
-        };
+        else {
 
-        // Uploads train data to the database
-        database.ref().push(newTrain);
+            var newTrain = {
+                name: name,
+                destination: destination,
+                time: time,
+                freq: freq
+            };
 
-        alert("Train successfully added");
+            // Uploads train data to the database
+            database.ref().push(newTrain);
+        }
+
+        isUpdate = false;
+        $("#trainForm").text("Add Train");
+        $("#add-train-btn").text("Add Train");
 
         // Clears all of the text-boxes
         $("#name-input").val("");
@@ -66,8 +88,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
         $("#freq-input").val("");
     });
 
-    var index = 0;
     database.ref().on("child_added", function (childSnapshot) {
+        console.log("Added");
         console.log(childSnapshot.val());
 
         // Store everything into a variable.
@@ -82,8 +104,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
         computeTime();
 
         // Create update and remove buttons
-        var updateButton = $("<button>").html("<span class='glyphicon glyphicon-edit'>U</span>").addClass("updateButton").attr("data-index", index).attr("data-key", key);
-        var removeButton = $("<button>").html("<span class='glyphicon glyphicon-remove'>R</span>").addClass("removeButton").attr("data-index", index).attr("data-key", key);
+        var updateButton = $("<button>").html("<span class='glyphicon glyphicon-edit'>U</span>").addClass("updateButton").attr("data-key", key);
+        var removeButton = $("<button>").html("<span class='glyphicon glyphicon-remove'>R</span>").addClass("removeButton").attr("data-key", key);
 
         // Create the new row
         var newRow = $("<tr>").append(
@@ -96,40 +118,107 @@ document.addEventListener("DOMContentLoaded", function (event) {
             $("<td>").html(updateButton),
             $("<td>").html(removeButton)
         );
-
-        index++;
+        newRow.attr("data-key", key);
 
         // Append the new row to the table
         $("#train-table > tbody").append(newRow);
     });
 
+    // Update the train table view after a DB change - all except add
+    function updateTrains() {
+
+        console.log("Update trains");
+
+        // Empty table except for header row
+        // https://stackoverflow.com/questions/370013/jquery-delete-all-table-rows-except-first
+        $("#itinerary-table").find("tr:gt(0)").remove();
+
+        // Loop through the current train data and
+        // create new rows in the table
+        database.ref().once('value', function (snapshot) {
+            snapshot.forEach(function (childSnapshot) {
+                var childKey = childSnapshot.key;
+                var childData = childSnapshot.val();
+                console.log(childKey);
+                console.log(childData);
+
+                // Store everything into a variable.
+                var key = childSnapshot.key;
+                console.log("Key " + key);
+                var name = childSnapshot.val().name;
+                var destination = childSnapshot.val().destination;
+                firstTime = childSnapshot.val().time;
+                freq = childSnapshot.val().freq;
+
+                // Compute time values
+                computeTime();
+
+                // Create update and remove buttons
+                var updateButton = $("<button>").html("<span class='glyphicon glyphicon-edit'>U</span>").addClass("updateButton").attr("data-key", key);
+                var removeButton = $("<button>").html("<span class='glyphicon glyphicon-remove'>R</span>").addClass("removeButton").attr("data-key", key);
+
+                // Create the new row
+                var newRow = $("<tr>").append(
+                    $("<td>").text(name),
+                    $("<td>").text(destination),
+                    $("<td>").text(firstTime),
+                    $("<td>").text(freq),
+                    $("<td>").text(nextArrival),
+                    $("<td>").text(minutesAway),
+                    $("<td>").html(updateButton),
+                    $("<td>").html(removeButton)
+                );
+                newRow.attr("data-key", key);
+
+                // Append the new row to the table
+                $("#train-table > tbody").append(newRow);
+
+            });
+        });
+    }
+
+    database.ref().on("child_removed", function (childSnapshot) {
+        console.log("Removed");
+        console.log(childSnapshot.val());
+        console.log(childSnapshot.key);
+        updateTrains();
+    });
+
+    database.ref().on("child_changed", function (childSnapshot) {
+        console.log("Updated");
+        console.log(childSnapshot.val());
+        console.log(childSnapshot.key);
+        updateTrains();
+    });
+
+    // Compute train times
     function computeTime() {
-        console.log("In computeTime " + firstTime);
+        // console.log("In computeTime " + firstTime);
 
         // First Time (pushed back 1 year to make sure it comes before current time)
         var firstTimeConverted = moment(firstTime, "HH:mm").subtract(1, "years");
-        console.log(firstTimeConverted);
+        // console.log(firstTimeConverted);
 
         // Current Time
         var currentTime = moment();
-        console.log("CURRENT TIME: " + moment(currentTime).format("HH:mm"));
+        // console.log("CURRENT TIME: " + moment(currentTime).format("HH:mm"));
 
         // Difference between the times
         var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
-        console.log("DIFFERENCE IN TIME: " + diffTime);
+        // console.log("DIFFERENCE IN TIME: " + diffTime);
 
         // Time apart (remainder)
         var tRemainder = diffTime % freq;
-        console.log(tRemainder);
+        // console.log(tRemainder);
 
         // Minute Until Train
         minutesAway = freq - tRemainder;
-        console.log("MINUTES TILL TRAIN: " + minutesAway);
+        // console.log("MINUTES TILL TRAIN: " + minutesAway);
 
         // Next Train
         nextArrival = moment().add(minutesAway, "minutes");
         nextArrival = moment(nextArrival).format("HH:mm");
-        console.log("ARRIVAL TIME: " + nextArrival);
+        // console.log("ARRIVAL TIME: " + nextArrival);
     }
 
     // Variable mainIntervalObj will hold the setInterval 
@@ -149,12 +238,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     // Update arrivals
     function incrementArrival() {
-        console.log("In incrementArrival");
+        // console.log("In incrementArrival");
 
         //run through each row
         $('#train-table tr').each(function (i, row) {
-            console.log($(row));
-            console.log($(row)[0].cells[0].innerHTML);
+            // console.log($(row));
+            // console.log($(row)[0].cells[0].innerHTML);
             if (!($(row)[0].cells[0].innerText.trim() === "Train Name")) {
 
                 firstTime = $(row)[0].cells[2].textContent;
@@ -163,7 +252,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 $(row)[0].cells[4].textContent = nextArrival;
                 $(row)[0].cells[5].textContent = minutesAway;
             }
-            index++;
         });
 
     }
@@ -175,12 +263,46 @@ document.addEventListener("DOMContentLoaded", function (event) {
     }
 
     $(document).on("click", ".removeButton", removeRow);
+    $(document).on("click", ".updateButton", updateRow);
 
     function removeRow() {
         console.log("Remove row ");
-        $(".row-" + $(this).attr("data-index")).remove();
+        console.log($(this).attr("data-key"));
         database.ref().child($(this).attr("data-key")).remove();
+        reload_page();
     };
 
+    function updateRow() {
+        isUpdate = true;
+        $("#trainForm").text("Update Train");
+        $("#add-train-btn").text("Update Train");
+        console.log("Update row ");
+        console.log($(this).attr("data-key"));
+
+        var thisKey = $(this).attr("data-key");
+        uid = thisKey;
+        $('#train-table tr').each(function (i, row) {
+            console.log(i);
+            console.log(row);
+            if (i > 0) {
+                console.log($(this).attr("data-key"));
+
+                if ($(this).attr("data-key") === thisKey) {
+                    $("#name-input").val($(row)[0].cells[0].innerText.trim());
+                    $("#destination-input").val($(row)[0].cells[1].innerText.trim());
+                    $("#time-input").val($(row)[0].cells[2].innerText.trim());
+                    $("#freq-input").val($(row)[0].cells[3].innerText.trim());
+                }
+            }
+        });
+
+        // database.ref().child($(this).attr("data-key")).remove();
+        // reload_page();
+    };
+
+    function reload_page() {
+        console.log("reload");
+        window.location.reload();
+    }
 
 });
