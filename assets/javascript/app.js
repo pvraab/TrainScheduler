@@ -11,7 +11,6 @@
 // Wait for document to finish loading
 $(document).ready(function () {
 
-
     var firstTime;
     var freq;
     var nextArrival;
@@ -131,7 +130,7 @@ $(document).ready(function () {
 
         // Empty table except for header row
         // https://stackoverflow.com/questions/370013/jquery-delete-all-table-rows-except-first
-        $("#itinerary-table").find("tr:gt(0)").remove();
+        $("#train-table").find("tr:gt(0)").remove();
 
         // Loop through the current train data and
         // create new rows in the table
