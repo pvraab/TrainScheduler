@@ -9,17 +9,44 @@ var config = {
 };
 firebase.initializeApp(config);
 
-var provider = new firebase.auth.GoogleAuthProvider();
+var googleProvider = new firebase.auth.GoogleAuthProvider();
+var gitHubProvider = new firebase.auth.GithubAuthProvider();
 
+// Google signin
 function googleSignin() {
     firebase.auth()
 
-        .signInWithPopup(provider).then(function (result) {
+        .signInWithPopup(googleProvider).then(function (result) {
+            var token = result.credential.accessToken;
+            var user = result.user;
+
+            // Put in local storage
+            localStorage.setItem("type", "google");
+
+            // Replace login screen with main app window
+            window.location.replace("./main.html")
+
+        }).catch(function (error) {
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            console.log(error.code)
+            console.log(error.message)
+        });
+}
+
+// GitHub signin
+function gitHubSignin() {
+    firebase.auth().signInWithPopup(gitHubProvider)
+
+        .then(function (result) {
             var token = result.credential.accessToken;
             var user = result.user;
 
             console.log(token)
             console.log(user)
+
+            // Put in local storage
+            localStorage.setItem("type", "gitHub");
 
             // Replace login screen with main app window
             window.location.replace("./main.html")
@@ -33,12 +60,12 @@ function googleSignin() {
         });
 }
 
-function googleSignout() {
-    firebase.auth().signOut()
+// Easy signin
+function easySignin() {
 
-        .then(function () {
-            console.log('Signout Succesfull')
-        }, function (error) {
-            console.log('Signout Failed')
-        });
+    // Put in local storage
+    localStorage.setItem("type", "easy");
+
+    // Replace login screen with main app window
+    window.location.replace("./main.html")
 }

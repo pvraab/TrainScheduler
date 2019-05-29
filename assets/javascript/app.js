@@ -34,19 +34,43 @@ $(document).ready(function () {
 
     var database = firebase.database();
 
-    $("#googleSignout").on("click", function (event) {
+    var type = localStorage.getItem("type");
+
+    $("#signout").on("click", function (event) {
 
         // Stop default form behavior
         event.preventDefault();
 
-        firebase.auth().signOut()
-            .then(function () {
-                // Replace login screen with main app window
-                window.location.replace("./index.html")
+        // Google signout
+        if (type === "google") {
 
-            }, function (error) {
-                console.log('Signout Failed')
-            });
+            firebase.auth().signOut()
+                .then(function () {
+
+                    // Replace login screen with main app window
+                    window.location.replace("./index.html");
+
+                }, function (error) {
+                    console.log('Signout Failed');
+                });
+        }
+
+        // GitHub signout
+        else if (type === "gitHub") {
+            firebase.auth().signOut()
+                .then(function () {
+                    // Replace login screen with main app window
+                    window.location.replace("./index.html");
+                }, function (error) {
+                    console.log('Signout failed');
+                });
+        }
+
+        // Easy signout
+        else if (type === "easy") {
+            // Replace login screen with main app window
+            window.location.replace("./index.html");
+        }
     });
 
     // Handle an onclick event on the Train Admin submit/update button

@@ -38,7 +38,15 @@
         <div class="jumbotron" id="jumboLogin" style="background-color: black; color: white">
             <div class="container">
                 <h3 class="text-center">Train Scheduler</h3>
-                <button class="btn-sm btn-primary float-right" onclick="googleSignin()">Google Signin</button>
+                <div class="btn-group mr-1" role="group" aria-label="First group">
+                    <button class="btn btn-sm btn-primary float-left" onclick="googleSignin()">Google Login</button>
+                </div>
+                <div class="btn-group mr-1" role="group" aria-label="Second group">
+                    <button class="btn btn-sm btn-primary float-center" onclick="gitHubSignin()">GitHub Login</button>
+                </div>
+                <div class="btn-group mr-1" role="group" aria-label="Third group">
+                    <button class="btn btn-sm btn-primary float-right" onclick="easySignin()">Easy Login</button>
+                </div>
             </div>
         </div>
     </div>
