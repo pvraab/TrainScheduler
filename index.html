@@ -1,120 +1,43 @@
-<!-- HTML for Bootcamp Homework #7 -->
-<!-- Paul Raab -->
-<!-- Raab Enterprises LLC -->
-<!-- 4/12/2019 -->
-<!-- Train Scheduler App -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset=utf-8 />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Train Scheduler</title>
+    <title>Email Link Authentication Example</title>
 
-  <!-- Reset browsers to initial conditions -->
-  <link rel="stylesheet" href="./assets/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="./assets/css/reset.css">
 
-  <!-- Bootstrap -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-  <!-- App style sheet -->
-  <link rel="stylesheet" href="./assets/css/style.css">
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    <!-- Bootstrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <!-- Firebase Reference -->
+    <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="./assets/css/login.css">
 
 </head>
 
 <body>
+    <div id="wrapper">
 
-  <div id="wrapper">
-
-    <!-- Train Scheduler -->
-    <div class="container">
-
-      <!-- Jumbotron -->
-      <div class="jumbotron" style="background-color: black; color: white">
-        <h1 class="text-center">Train Scheduler</h1>
-        <h3 class="text-center">Manage trains and their schedules</h3>
-      </div>
-
-      <div class="row">
-
-        <div class="col-md-12">
-
-          <!-- Current trains-->
-          <div class="card mb-4">
-            <div class="card-header">Current Trains</div>
-            <div class="card-body">
-              <table class="table table-sm table-hover" id='train-table'>
-                <thead>
-                  <tr>
-                    <!-- The scope attribute specifies that this is a header for a column -->
-                    <th scope="col">Train Name</th>
-                    <th scope="col">Destination</th>
-                    <th scope="col">First Time</th>
-                    <th scope="col">Frequency (min)</th>
-                    <th scope="col">Next Arrival</th>
-                    <th scope="col">Minutes Away</th>
-                    <th scope="col">Update</th>
-                    <th scope="col">Remove</th>
-                  </tr>
-                </thead>
-                <tbody>
-                </tbody>
-              </table>
+        <!-- Train Scheduler -->
+        <div class="jumbotron" id="jumboLogin" style="background-color: black; color: white">
+            <div class="container">
+                <h3 class="text-center">Train Scheduler</h3>
+                <button class="btn-sm btn-primary float-right" onclick="googleSignin()">Google Signin</button>
             </div>
-          </div>
         </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-12">
-          <!-- Add Employee  -->
-          <div class="card mb-4">
-            <div class="card-header" id="trainForm">Add Train</div>
-            <div class="card-body">
-
-              <!-- Entry Form -->
-              <form>
-                <div class="form-group">
-                  <label for="name-input">Enter Train Name</label>
-                  <input class="form-control" id="name-input" placeholder="The John Galt Line" type="text">
-                </div>
-                <div class="form-group">
-                  <label for="destination-input">Enter Destination</label>
-                  <input class="form-control" id="destination-input" placeholder="Galts Gulch, CO" type="text">
-                </div>
-                <div class="form-group">
-                  <label for="time-input">Enter First Train Time (HH:MM)</label>
-                  <input class="form-control" id="time-input" placeholder="15:00" type="text">
-                </div>
-                <div class="form-group">
-                  <label for="freq-input">Frequency (min)</label>
-                  <input class="form-control" id="freq-input" placeholder="60" type="text">
-                </div>
-                <button class="btn btn-primary float-right" id="add-train-btn">Add Train</button>
-              </form>
-
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
-  </div>
 
-  <!-- Bootstrap scripts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-
-  <!-- Firebase Reference -->
-  <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase.js"></script>
-
-  <!-- Moment.js Reference -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
-
-  <!-- Local app javascript -->
-  <script src="./assets/javascript/app.js"></script>
-
+    <script src="./assets/javascript/login.js"></script>
 </body>
 
 </html>

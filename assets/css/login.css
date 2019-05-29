@@ -1,0 +1,18 @@
+body {
+    height: 100%;
+    width: 100%;
+    background: url("../images/Train1.jpg") no-repeat fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#jumboLogin {
+    height: 200px;
+    width: 400px;
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+}

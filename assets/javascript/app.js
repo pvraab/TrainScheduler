@@ -34,6 +34,21 @@ $(document).ready(function () {
 
     var database = firebase.database();
 
+    $("#googleSignout").on("click", function (event) {
+
+        // Stop default form behavior
+        event.preventDefault();
+
+        firebase.auth().signOut()
+            .then(function () {
+                // Replace login screen with main app window
+                window.location.replace("./index.html")
+
+            }, function (error) {
+                console.log('Signout Failed')
+            });
+    });
+
     // Handle an onclick event on the Train Admin submit/update button
     $("#add-train-btn").on("click", function () {
 
@@ -88,12 +103,8 @@ $(document).ready(function () {
     });
 
     database.ref().on("child_added", function (childSnapshot) {
-        console.log("Added");
-        console.log(childSnapshot.val());
-
         // Store everything into a variable.
         var key = childSnapshot.key;
-        console.log("Key " + key);
         var name = childSnapshot.val().name;
         var destination = childSnapshot.val().destination;
         firstTime = childSnapshot.val().time;
@@ -126,8 +137,6 @@ $(document).ready(function () {
     // Update the train table view after a DB change - all except add
     function updateTrains() {
 
-        console.log("Update trains");
-
         // Empty table except for header row
         // https://stackoverflow.com/questions/370013/jquery-delete-all-table-rows-except-first
         $("#train-table").find("tr:gt(0)").remove();
@@ -138,12 +147,9 @@ $(document).ready(function () {
             snapshot.forEach(function (childSnapshot) {
                 var childKey = childSnapshot.key;
                 var childData = childSnapshot.val();
-                console.log(childKey);
-                console.log(childData);
 
                 // Store everything into a variable.
                 var key = childSnapshot.key;
-                console.log("Key " + key);
                 var name = childSnapshot.val().name;
                 var destination = childSnapshot.val().destination;
                 firstTime = childSnapshot.val().time;
@@ -176,48 +182,37 @@ $(document).ready(function () {
         });
     }
 
+    // When a child removed update the train table
     database.ref().on("child_removed", function (childSnapshot) {
-        console.log("Removed");
-        console.log(childSnapshot.val());
-        console.log(childSnapshot.key);
         updateTrains();
     });
 
+    // When a child updated update the train table
     database.ref().on("child_changed", function (childSnapshot) {
-        console.log("Updated");
-        console.log(childSnapshot.val());
-        console.log(childSnapshot.key);
         updateTrains();
     });
 
-    // Compute train times
+    // Compute train times using moment.js
     function computeTime() {
-        // console.log("In computeTime " + firstTime);
 
         // First Time (pushed back 1 year to make sure it comes before current time)
         var firstTimeConverted = moment(firstTime, "HH:mm").subtract(1, "years");
-        // console.log(firstTimeConverted);
 
         // Current Time
         var currentTime = moment();
-        // console.log("CURRENT TIME: " + moment(currentTime).format("HH:mm"));
 
         // Difference between the times
         var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
-        // console.log("DIFFERENCE IN TIME: " + diffTime);
 
         // Time apart (remainder)
         var tRemainder = diffTime % freq;
-        // console.log(tRemainder);
 
         // Minute Until Train
         minutesAway = freq - tRemainder;
-        // console.log("MINUTES TILL TRAIN: " + minutesAway);
 
         // Next Train
         nextArrival = moment().add(minutesAway, "minutes");
         nextArrival = moment(nextArrival).format("HH:mm");
-        // console.log("ARRIVAL TIME: " + nextArrival);
     }
 
     // Variable mainIntervalObj will hold the setInterval 
@@ -229,20 +224,17 @@ $(document).ready(function () {
     function startTimer() {
         if (!mainClockRunning) {
             // Use mainIntervalObj to hold the setInterval to 
-            // update the train arrivals every minute
+            // update the train arrivals every minute - we check every 5 seconds
             mainIntervalObj = setInterval(incrementArrival, 5000);
             mainClockRunning = true;
         }
     }
 
-    // Update arrivals
+    // Update arrival times
     function incrementArrival() {
-        // console.log("In incrementArrival");
 
-        //run through each row
+        // Run through each row
         $('#train-table tr').each(function (i, row) {
-            // console.log($(row));
-            // console.log($(row)[0].cells[0].innerHTML);
             if (!($(row)[0].cells[0].innerText.trim() === "Train Name")) {
 
                 firstTime = $(row)[0].cells[2].textContent;
@@ -255,15 +247,11 @@ $(document).ready(function () {
 
     }
 
-    // This function will replace display whatever image it's given
-    // in the 'src' attribute of the img tag.
-    function displayImage() {
-        $("#wrapper").css('background-image', 'url("' + images[count] + '")');
-    }
-
+    // Handle table cell button clicks
     $(document).on("click", ".removeButton", removeRow);
     $(document).on("click", ".updateButton", updateRow);
 
+    // Remove a row from the train table - update the DB - refresh the page
     function removeRow() {
         console.log("Remove row ");
         console.log($(this).attr("data-key"));
@@ -271,21 +259,15 @@ $(document).ready(function () {
         reload_page();
     };
 
+    // Update a row in the train table - update the DB - refresh the page
     function updateRow() {
         isUpdate = true;
         $("#trainForm").text("Update Train");
         $("#add-train-btn").text("Update Train");
-        console.log("Update row ");
-        console.log($(this).attr("data-key"));
-
         var thisKey = $(this).attr("data-key");
         uid = thisKey;
         $('#train-table tr').each(function (i, row) {
-            console.log(i);
-            console.log(row);
             if (i > 0) {
-                console.log($(this).attr("data-key"));
-
                 if ($(this).attr("data-key") === thisKey) {
                     $("#name-input").val($(row)[0].cells[0].innerText.trim());
                     $("#destination-input").val($(row)[0].cells[1].innerText.trim());
@@ -294,13 +276,10 @@ $(document).ready(function () {
                 }
             }
         });
-
-        // database.ref().child($(this).attr("data-key")).remove();
-        // reload_page();
     };
 
+    // Reload the page
     function reload_page() {
-        console.log("reload");
         window.location.reload();
     }
 
